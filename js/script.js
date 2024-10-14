@@ -13,41 +13,47 @@ function safeSetTextContent(id, text) {
     }
 }
 
-// Function to load and parse CSV data using Papa Parse
-function loadCSVData() {
+// Get CSV file from google drive
+function loadCSVFromURL(url) {
     return new Promise((resolve, reject) => {
-        const fileName = `../${currentYear}-prayer-time.csv`;
-        console.log('fileName: ', fileName);
-
-        Papa.parse(fileName, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                if (results.errors.length) {
-                    console.error('Error parsing CSV:', results.errors);
-                    reject(results.errors);
-                } else {
-                    const prayerTimesData = {};
-                    results.data.forEach(row => {
-                        if (row.date) {
-                            prayerTimesData[row.date] = {
-                                FAJR: row.fajr,
-                                ZUHR: row.zuhr,
-                                ASR: row.asr,
-                                MAGHRIB: row.maghrib,
-                                ISHA: row.isha
-                            };
-                        }
-                    });
-                    resolve(prayerTimesData);
-                }
-            },
-            error: function(error) {
-                console.error('Error loading CSV:', error);
-                reject(error);
-            }
-        });
+      Papa.parse(url, {
+        download: true,
+        header: true, // Set to true if your CSV has headers
+        complete: (results) => {
+          resolve(results.data);
+        },
+        error: (error) => {
+          reject('Error parsing CSV: ' + error);
+        }
+      });
     });
+  }
+  
+
+// Function to load and parse CSV data
+async function loadCSVData() {
+    const fileName = 'https://raw.githubusercontent.com/himo-tech/cmam-prayer-time/3d7bdf57cd42ac3c75882f0adc1b024bd63843e9/2024-prayer-time.csv';
+    try {
+        const data = await loadCSVFromURL(fileName);
+        console.log('CSV data:', data);
+        const prayerTimes = {};
+        for (let i = 0; i < data.length; i++) {
+            if (data) {
+                const date = data[i].date;
+                prayerTimes[date] = {
+                    fajr: data[i].fajr,
+                    zuhr: data[i].zuhr,
+                    asr: data[i].asr,
+                    maghrib: data[i].maghrib,
+                    isha: data[i].isha
+                };
+            }
+        }
+        return prayerTimes;
+    } catch (error) {
+        console.error('Error loading or parsing CSV:', error);
+        return null;
+    }
 }
 
 // Function to add minutes to a time string
@@ -171,16 +177,18 @@ async function initializeApp() {
     try {
         const prayerTimesData = await loadCSVData();
         const today = currentDate.toISOString().split('T')[0].split('-').reverse().join('-');
-        prayerTimes = prayerTimesData[today];
-        if (!prayerTimes) {
-            throw new Error('Prayer times not found for today');
+        if (!!prayerTimesData) {
+            prayerTimes = prayerTimesData[today];
+            if (!prayerTimes) {
+                throw new Error('Prayer times not found for today');
+            }
+            createPrayerCards();
+            updateClockAndTimer();
+            
+            // Update the date display
+            const frenchDate = formatDateInFrench(currentDate);
+            safeSetTextContent('date', frenchDate);
         }
-        createPrayerCards();
-        updateClockAndTimer();
-        
-        // Update the date display
-        const frenchDate = formatDateInFrench(currentDate);
-        safeSetTextContent('date', frenchDate);
     } catch (error) {
         console.error('Failed to initialize app:', error);
         safeSetTextContent('error-message', 'Failed to load prayer times. Please try again later.');

@@ -175,6 +175,7 @@ function updateClockAndTimer() {
             const minutesToNextPrayer = Math.floor((timeToNextPrayer % 3600000) / 60000);
             const secondsToNextPrayer = Math.floor((timeToNextPrayer % 60000) / 1000);
             timerText = `Prochaine prière: ${nextPrayer.name.toUpperCase()} dans ${hoursToNextPrayer.toString().padStart(2, '0')}:${minutesToNextPrayer.toString().padStart(2, '0')}:${secondsToNextPrayer.toString().padStart(2, '0')}`;
+            highlightPrayerCard(nextPrayer.name);
         }
     } else {
         // Before the first prayer of the day
@@ -184,6 +185,7 @@ function updateClockAndTimer() {
         const minutesToNextPrayer = Math.floor((timeToNextPrayer % 3600000) / 60000);
         const secondsToNextPrayer = Math.floor((timeToNextPrayer % 60000) / 1000);
         timerText = `Prochaine prière: ${nextPrayer.name.toUpperCase()} dans ${hoursToNextPrayer.toString().padStart(2, '0')}:${minutesToNextPrayer.toString().padStart(2, '0')}:${secondsToNextPrayer.toString().padStart(2, '0')}`;
+        highlightPrayerCard(nextPrayer.name);
     }
 
     safeSetTextContent('timer', timerText);

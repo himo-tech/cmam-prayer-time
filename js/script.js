@@ -16,7 +16,7 @@ function safeSetTextContent(id, text) {
 // Function to load and parse CSV data using Papa Parse
 function loadCSVData() {
     return new Promise((resolve, reject) => {
-        const fileName = `../source/${currentYear}-prayer-time.csv`;
+        const fileName = `../media/${currentYear}-prayer-time.csv`;
         console.log('fileName: ', fileName);
 
         Papa.parse(fileName, {

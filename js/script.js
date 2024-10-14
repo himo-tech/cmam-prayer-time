@@ -2,6 +2,7 @@
 let prayerTimes = null;
 let currentDate = new Date();
 const currentYear = new Date().getFullYear().toString();
+const iqamahTime = {fajr: 20, zuhr: 15, asr: 15, maghrib: 5, isha: 10};
 
 // Function to safely set text content of an element
 function safeSetTextContent(id, text) {
@@ -27,8 +28,7 @@ function loadCSVFromURL(url) {
         }
       });
     });
-  }
-  
+}
 
 // Function to load and parse CSV data
 async function loadCSVData() {
@@ -38,7 +38,7 @@ async function loadCSVData() {
         console.log('CSV data:', data);
         const prayerTimes = {};
         for (let i = 0; i < data.length; i++) {
-            if (data) {
+            if (data[i]) {
                 const date = data[i].date;
                 prayerTimes[date] = {
                     fajr: data[i].fajr,
@@ -74,17 +74,25 @@ function createPrayerCards() {
     }
     prayerCardsContainer.innerHTML = ''; // Clear existing cards
     for (const [name, time] of Object.entries(prayerTimes)) {
-        const iqamah = addMinutes(time, 10);
+        const iqamah = addMinutes(time, iqamahTime[name]);
         const card = document.createElement('div');
         card.className = 'prayer-card';
+        card.id = name;
         card.innerHTML = `
-            <div class="prayer-name">${name}</div>
-            <div>Adhan: ${time}</div>
-            <div>Iqamah: ${iqamah}</div>
+            <div class="prayer-name">${name.toUpperCase()}</div>
+            <div class="prayer-time">Adhan: ${time}</div>
+            <div class="prayer-time">Iqamah: ${iqamah}</div>
         `;
         prayerCardsContainer.appendChild(card);
     }
 }
+
+// Highlight a prayer card
+function highlightPrayerCard(id) {
+    const card = document.getElementById(id);
+    card.classList.add('highlighted');
+}
+
 
 //format in french
 function formatDateInFrench(date) {
@@ -117,59 +125,68 @@ function updateClockAndTimer() {
 
     if (!prayerTimes) return;
 
-    // Find the next prayer time
+    // Find the current and next prayer times
+    let currentPrayer = null;
     let nextPrayer = null;
-    let isLastPrayer = false;
-    for (const [name, time] of Object.entries(prayerTimes)) {
-        if (time > currentTime.slice(0, 5)) {
-            nextPrayer = { name, time };
+    const prayerNames = Object.keys(prayerTimes);
+    
+    for (let i = 0; i < prayerNames.length; i++) {
+        const name = prayerNames[i];
+        const time = prayerTimes[name];
+        const prayerIqamahTime = addMinutes(time, iqamahTime[name.toLowerCase()]);
+        
+        if (currentTime.slice(0, 5) >= time && (i === prayerNames.length - 1 || currentTime.slice(0, 5) < prayerTimes[prayerNames[i+1]])) {
+            currentPrayer = { name, time, iqamahTime: prayerIqamahTime };
+            nextPrayer = i === prayerNames.length - 1 ? { name: prayerNames[0], time: prayerTimes[prayerNames[0]] } : { name: prayerNames[i+1], time: prayerTimes[prayerNames[i+1]] };
             break;
         }
     }
-    if (!nextPrayer) {
-        nextPrayer = { name: 'FAJR', time: prayerTimes.FAJR };
-        isLastPrayer = true;
-    }
 
-    const iqamahTime = addMinutes(nextPrayer.time, 10);
-    let timeDiff;
-    if (isLastPrayer) {
-        // For the last prayer, calculate time until midnight
-        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-        timeDiff = midnight - now;
+    if (!currentPrayer) {
+        // If no current prayer found, it means we're before the first prayer of the day
+        nextPrayer = { name: prayerNames[0], time: prayerTimes[prayerNames[0]] };
+        highlightPrayerCard(nextPrayer.name);
     } else {
-        timeDiff = new Date(`${currentDate.toISOString().split('T')[0]}T${iqamahTime}:00`) - now;
+        highlightPrayerCard(currentPrayer.name);
     }
-    
-    const hours = Math.floor(timeDiff / 3600000);
-    const minutes = Math.floor((timeDiff % 3600000) / 60000);
-    const seconds = Math.floor((timeDiff % 60000) / 1000);
 
-    safeSetTextContent('timer', `Prochaine prière: ${nextPrayer.name} dans ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    let timerText = '';
+    const isPastMidnight = currentTime.slice(0, 5) < prayerTimes[prayerNames[0]];
 
-    // Highlight current prayer card
-    const cards = document.getElementsByClassName('prayer-card');
-    for (let i = 0; i < cards.length; i++) {
-        const cardName = cards[i].querySelector('.prayer-name').textContent;
-        const cardTime = prayerTimes[cardName];
-        const cardIqamah = addMinutes(cardTime, 10);
-        let isHighlighted;
-        
-        if (cardName === 'ISHA') {
-            // For Isha, highlight until midnight
-            isHighlighted = now >= new Date(`${currentDate.toISOString().split('T')[0]}T${cardTime}:00`);
-        } else {
-            // For other prayers, highlight within 30 minutes of Iqamah
-            isHighlighted = now >= new Date(`${currentDate.toISOString().split('T')[0]}T${cardTime}:00`) &&
-                            now <= new Date(`${currentDate.toISOString().split('T')[0]}T${addMinutes(cardIqamah, 30)}:00`);
+    if (currentPrayer) {
+        const iqamahMoment = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...currentPrayer.iqamahTime.split(':'));
+        const timeSinceIqamah = now - iqamahMoment;
+
+        if (currentTime.slice(0, 5) < currentPrayer.iqamahTime) {
+            // Before Iqamah
+            const timeToIqamah = iqamahMoment - now;
+            const minutesToIqamah = Math.floor(timeToIqamah / 60000);
+            const secondsToIqamah = Math.floor((timeToIqamah % 60000) / 1000);
+            timerText = `L'Iqamah est dans: ${minutesToIqamah.toString().padStart(2, '0')}:${secondsToIqamah.toString().padStart(2, '0')}`;
+        } else if (timeSinceIqamah <= 30 * 60 * 1000 || (currentPrayer.name === 'isha' && !isPastMidnight)) {
+            // Within 30 minutes after Iqamah or Isha before midnight
+            timerText = `Salat ${currentPrayer.name.toUpperCase()}`;
+        } else if (currentPrayer.name !== 'isha' || isPastMidnight) {
+            // More than 30 minutes after Iqamah (except for Isha) or past midnight
+            const nextPrayerTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...nextPrayer.time.split(':'));
+            if (nextPrayerTime < now) nextPrayerTime.setDate(nextPrayerTime.getDate() + 1);
+            const timeToNextPrayer = nextPrayerTime - now;
+            const hoursToNextPrayer = Math.floor(timeToNextPrayer / 3600000);
+            const minutesToNextPrayer = Math.floor((timeToNextPrayer % 3600000) / 60000);
+            const secondsToNextPrayer = Math.floor((timeToNextPrayer % 60000) / 1000);
+            timerText = `Prochaine prière: ${nextPrayer.name.toUpperCase()} dans ${hoursToNextPrayer.toString().padStart(2, '0')}:${minutesToNextPrayer.toString().padStart(2, '0')}:${secondsToNextPrayer.toString().padStart(2, '0')}`;
         }
-        
-        if (isHighlighted) {
-            cards[i].classList.add('highlighted');
-        } else {
-            cards[i].classList.remove('highlighted');
-        }
+    } else {
+        // Before the first prayer of the day
+        const nextPrayerTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...nextPrayer.time.split(':'));
+        const timeToNextPrayer = nextPrayerTime - now;
+        const hoursToNextPrayer = Math.floor(timeToNextPrayer / 3600000);
+        const minutesToNextPrayer = Math.floor((timeToNextPrayer % 3600000) / 60000);
+        const secondsToNextPrayer = Math.floor((timeToNextPrayer % 60000) / 1000);
+        timerText = `Prochaine prière: ${nextPrayer.name.toUpperCase()} dans ${hoursToNextPrayer.toString().padStart(2, '0')}:${minutesToNextPrayer.toString().padStart(2, '0')}:${secondsToNextPrayer.toString().padStart(2, '0')}`;
     }
+
+    safeSetTextContent('timer', timerText);
 }
 
 // Initialize the application
@@ -177,7 +194,7 @@ async function initializeApp() {
     try {
         const prayerTimesData = await loadCSVData();
         const today = currentDate.toISOString().split('T')[0].split('-').reverse().join('-');
-        if (!!prayerTimesData) {
+        if (prayerTimesData) {
             prayerTimes = prayerTimesData[today];
             if (!prayerTimes) {
                 throw new Error('Prayer times not found for today');

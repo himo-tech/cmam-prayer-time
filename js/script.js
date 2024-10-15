@@ -93,6 +93,15 @@ function highlightPrayerCard(id) {
     card.classList.add('highlighted');
 }
 
+// Reset prayer cards classes
+function resetPrayerCards() {
+    const cards = document.getElementsByClassName('prayer-card')
+    for(let i=0; i<cards.length; i++){
+        const card = cards[i];
+        card.className = 'prayer-card';
+    };
+}
+
 
 //format in french
 function formatDateInFrench(date) {
@@ -145,8 +154,10 @@ function updateClockAndTimer() {
     if (!currentPrayer) {
         // If no current prayer found, it means we're before the first prayer of the day
         nextPrayer = { name: prayerNames[0], time: prayerTimes[prayerNames[0]] };
+        resetPrayerCards();
         highlightPrayerCard(nextPrayer.name);
     } else {
+        resetPrayerCards();
         highlightPrayerCard(currentPrayer.name);
     }
 
@@ -175,6 +186,7 @@ function updateClockAndTimer() {
             const minutesToNextPrayer = Math.floor((timeToNextPrayer % 3600000) / 60000);
             const secondsToNextPrayer = Math.floor((timeToNextPrayer % 60000) / 1000);
             timerText = `Prochaine prière: ${nextPrayer.name.toUpperCase()} dans ${hoursToNextPrayer.toString().padStart(2, '0')}:${minutesToNextPrayer.toString().padStart(2, '0')}:${secondsToNextPrayer.toString().padStart(2, '0')}`;
+            resetPrayerCards();
             highlightPrayerCard(nextPrayer.name);
         }
     } else {
@@ -185,6 +197,7 @@ function updateClockAndTimer() {
         const minutesToNextPrayer = Math.floor((timeToNextPrayer % 3600000) / 60000);
         const secondsToNextPrayer = Math.floor((timeToNextPrayer % 60000) / 1000);
         timerText = `Prochaine prière: ${nextPrayer.name.toUpperCase()} dans ${hoursToNextPrayer.toString().padStart(2, '0')}:${minutesToNextPrayer.toString().padStart(2, '0')}:${secondsToNextPrayer.toString().padStart(2, '0')}`;
+        resetPrayerCards();
         highlightPrayerCard(nextPrayer.name);
     }
 

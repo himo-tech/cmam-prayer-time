@@ -4,6 +4,8 @@ let currentDate = new Date();
 const currentYear = new Date().getFullYear().toString();
 const iqamahTime = {fajr: 20, zuhr: 15, asr: 15, maghrib: 5, isha: 10};
 
+/*--Utiles Functions--*/
+
 // Function to safely set text content of an element
 function safeSetTextContent(id, text) {
     const element = document.getElementById(id);
@@ -13,6 +15,22 @@ function safeSetTextContent(id, text) {
         console.warn(`Element with id "${id}" not found`);
     }
 }
+
+// Function to add minutes to a time string
+function addMinutes(timeStr, minutes) {
+    if (!timeStr) return '';
+    const [hours, mins] = timeStr.split(':').map(Number);
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, mins + minutes);
+    return date.toTimeString().slice(0, 5);
+}
+
+// Helper function to convert time string to minutes
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+}
+
+/*---------------*/
 
 // Get CSV file from google drive
 function loadCSVFromURL(url) {
@@ -56,12 +74,20 @@ async function loadCSVData() {
     }
 }
 
-// Function to add minutes to a time string
-function addMinutes(timeStr, minutes) {
-    if (!timeStr) return '';
-    const [hours, mins] = timeStr.split(':').map(Number);
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, mins + minutes);
-    return date.toTimeString().slice(0, 5);
+// Function to determine Iqamah time for Isha
+function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
+    const prayerTimeMinutes = timeToMinutes(currentPrayerTime);
+    const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
+
+    if (prayerTimeMinutes < 1170 && iqamahTimeMinutes <= 1170) {
+        return '19:30';
+    } else if (prayerTimeMinutes < 1290 && iqamahTimeMinutes > 1290) {
+        return '21:30';
+    } else if (prayerTimeMinutes >= 1290) {
+        return currentPrayerTime;
+    } else {
+        return currentIqamahTime;
+    }
 }
 
 // Create prayer cards
@@ -74,7 +100,9 @@ function createPrayerCards() {
     }
     prayerCardsContainer.innerHTML = ''; // Clear existing cards
     for (const [name, time] of Object.entries(prayerTimes)) {
-        const iqamah = addMinutes(time, iqamahTime[name]);
+        const iqamah = name.toLowerCase() === 'isha' 
+            ? ishaIqamahTime(time, addMinutes(time, iqamahTime[name]))
+            : addMinutes(time, iqamahTime[name]);
         const card = document.createElement('div');
         card.className = 'prayer-card';
         card.id = name;

@@ -90,6 +90,30 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
     }
 }
 
+// Function to determine Iqamah time for zuhr
+function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
+    const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
+    const minimumIqamahTime = timeToMinutes('12:15');  // 735 minutes
+
+    if (iqamahTimeMinutes < minimumIqamahTime) {
+        return '12:15';
+    } else {
+        return currentIqamahTime;
+    }
+}
+
+// function to get Iqamah time
+function getIqamahTime (salatName, time, iqamahTime) {
+    if (salatName.toLowerCase() === 'isha') {
+        return ishaIqamahTime(time, addMinutes(time, iqamahTime))
+    } else if (salatName.toLowerCase() === 'zuhr') {
+        return zuhrIqamahTime(time, addMinutes(time, iqamahTime))
+    } else {
+        return addMinutes(time, iqamahTime)
+    }
+}
+
+
 // Create prayer cards
 function createPrayerCards() {
     if (!prayerTimes) return;
@@ -100,9 +124,7 @@ function createPrayerCards() {
     }
     prayerCardsContainer.innerHTML = ''; // Clear existing cards
     for (const [name, time] of Object.entries(prayerTimes)) {
-        const iqamah = name.toLowerCase() === 'isha' 
-            ? ishaIqamahTime(time, addMinutes(time, iqamahTime[name]))
-            : addMinutes(time, iqamahTime[name]);
+        const iqamah = getIqamahTime(name, time, iqamahTime[name])
         const card = document.createElement('div');
         card.className = 'prayer-card';
         card.id = name;

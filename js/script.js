@@ -50,7 +50,7 @@ function loadCSVFromURL(url) {
 
 // Function to load and parse CSV data
 async function loadCSVData() {
-    const fileName = `https://raw.githubusercontent.com/himo-tech/cmam-prayer-time/refs/heads/main/${currentYear}-prayer-time.csv`;
+    const fileName = `https://raw.githubusercontent.com/himo-tech/cmam-prayer-time/refs/heads/main/prayer-time/${currentYear}-prayer-time.csv`;
     try {
         const data = await loadCSVFromURL(fileName);
         console.log('CSV data:', data);

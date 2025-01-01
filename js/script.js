@@ -96,7 +96,7 @@ function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
     const minimumIqamahTime = timeToMinutes('12:30');  // 735 minutes
 
     if (iqamahTimeMinutes < minimumIqamahTime) {
-        return '12:15';
+        return '12:30';
     } else {
         return currentIqamahTime;
     }

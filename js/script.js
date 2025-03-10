@@ -81,6 +81,8 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
 
     if (prayerTimeMinutes < 1170 && iqamahTimeMinutes <= 1170) {
         return '19:30';
+    } else if (prayerTimeMinutes > 1170 && prayerTimeMinutes < 1260 && iqamahTimeMinutes <= 1260) {
+        return '21:00';
     } else if (prayerTimeMinutes < 1290 && iqamahTimeMinutes > 1290) {
         return '21:30';
     } else if (prayerTimeMinutes >= 1290) {
@@ -93,10 +95,10 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
 // Function to determine Iqamah time for zuhr
 function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
     const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
-    const minimumIqamahTime = timeToMinutes('12:30');  // 750 minutes
+    const minimumIqamahTime = timeToMinutes('13:30');  // 750 minutes
 
     if (iqamahTimeMinutes < minimumIqamahTime) {
-        return '12:30';
+        return '13:30';
     } else {
         return currentIqamahTime;
     }

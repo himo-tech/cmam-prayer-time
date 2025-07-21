@@ -426,6 +426,9 @@ async function initializeApp() {
             if (!prayerTimes) {
                 throw new Error('Prayer times not found for today');
             }
+            if (prayerTimes && prayerTimes.isha) {
+                prayerTimes.isha = addMinutes(prayerTimes.isha, 4);
+            }
             createPrayerCards();
             updateClockAndTimer();
             

@@ -63,7 +63,7 @@ async function loadCSVData() {
                     zuhr: data[i].zuhr,
                     asr: data[i].asr,
                     maghrib: data[i].maghrib,
-                    isha: data[i].isha
+                    isha: addMinutes(data[i].isha, 4)
                 };
             }
         }

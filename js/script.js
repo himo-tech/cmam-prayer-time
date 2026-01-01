@@ -3,6 +3,7 @@ let prayerTimes = null;
 let currentDate = new Date();
 const currentYear = new Date().getFullYear().toString();
 const iqamahTime = {fajr: 20, zuhr: 15, asr: 15, maghrib: 5, isha: 10};
+let isRetrying = false;
 
 /*--Utiles Functions--*/
 
@@ -200,9 +201,20 @@ function updateClockAndTimer() {
     // If prayerTimes global variable is not yet populated (e.g., on initial load or CSV error),
     // display a loading message and exit.
     if (!prayerTimes) {
-        safeSetTextContent('timer', 'Chargement des horaires...');
-        return;
+    safeSetTextContent('timer', 'Chargement des horaires...');
+
+    // If we aren't already waiting for a retry, start a 1-minute timer
+    if (!isRetrying) {
+        isRetrying = true; 
+        console.log("Prayer times missing. Retrying in 60 seconds...");
+        
+        setTimeout(() => {
+            isRetrying = false; // Reset the flag so we can try again if this fails
+            initializeApp();    // Attempt to fetch the file again
+        }, 60000); // 60000ms = 1 minute
     }
+    return;
+}
 
     // --- Reset all prayer cards to clear any existing highlights ---
     resetPrayerCards();

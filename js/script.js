@@ -78,13 +78,24 @@ async function loadCSVData() {
 
 // Function to determine Iqamah time for Isha
 function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
+    // Special period inclusive: 2026-02-17 → 2026-03-20
+    const today = new Date();
+    const start = new Date(2026, 1, 17); // Feb 17, 2026 (month is 0-based)
+    const end = new Date(2026, 2, 20);   // Mar 20, 2026
+
+    const inSpecialPeriod = today >= start && today <= end;
+    if (inSpecialPeriod) {
+        const day = today.getDay(); // Sunday = 0, Saturday = 6
+        const forcedIqamah = (day === 0 || day === 6) ? '20:45' : '21:00';
+        return forcedIqamah;
+    }
+
+    // Original logic for the rest of the year
     const prayerTimeMinutes = timeToMinutes(currentPrayerTime);
     const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
 
     if (prayerTimeMinutes < 1170 && iqamahTimeMinutes <= 1170) {
         return '19:30';
-    //} else if (prayerTimeMinutes > 1170 && prayerTimeMinutes < 1260 && iqamahTimeMinutes <= 1260) {
-    //    return '21:00';
     } else if (prayerTimeMinutes < 1290 && iqamahTimeMinutes > 1290) {
         return '21:30';
     } else if (prayerTimeMinutes >= 1290) {

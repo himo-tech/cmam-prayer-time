@@ -89,7 +89,7 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
     const inSpecialPeriod = today >= start && today <= end;
     if (inSpecialPeriod) {
         const day = today.getDay(); // Sunday = 0, Saturday = 6
-        const forcedIqamah = (day === 0 || day === 6) ? '20:45' : '21:00';
+        const forcedIqamah = (day === 0 || day === 6) ? '20:30' : '21:00';
         return forcedIqamah;
     }
 

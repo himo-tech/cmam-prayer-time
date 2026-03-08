@@ -111,8 +111,8 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
 // Iqamah logic for Zuhr
 function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
     const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
-    const minimumIqamahTime = timeToMinutes('13:15');
-    return (iqamahTimeMinutes < minimumIqamahTime) ? '12:30' : currentIqamahTime;
+    const minimumIqamahTime = timeToMinutes('13:30');
+    return (iqamahTimeMinutes < minimumIqamahTime) ? '13:30' : currentIqamahTime;
 }
 
 // Global Iqamah Selector

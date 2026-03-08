@@ -1,3 +1,5 @@
+//NOT USED
+
 // Global variables
 let prayerTimes = null;
 let currentDate = new Date();

@@ -176,9 +176,9 @@ async function initializeApp() {
             prayerTimes = prayerTimesData[todayKey];
             
             // Apply Isha offset if needed
-            if (prayerTimes.isha) {
-                prayerTimes.isha = addMinutes(prayerTimes.isha, 4);
-            }
+            // if (prayerTimes.isha) {
+            //     prayerTimes.isha = addMinutes(prayerTimes.isha, 4);
+            // }
             
             createPrayerCards();
             safeSetTextContent('date', formatDateInFrench(currentDate));

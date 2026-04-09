@@ -2,7 +2,7 @@
 let prayerTimes = null;
 let currentDate = new Date(); // Machine local time
 const currentYear = currentDate.getFullYear().toString();
-const iqamahTime = {fajr: 20, zuhr: 15, asr: 15, maghrib: 5, isha: 10};
+const iqamahTime = {fajr: 20, zuhr: 10, asr: 15, maghrib: 5, isha: 10};
 
 // Flag to prevent multiple simultaneous retry attempts
 let isRetrying = false;
@@ -111,8 +111,8 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
 // Iqamah logic for Zuhr
 function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
     const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
-    const minimumIqamahTime = timeToMinutes('13:30');
-    return (iqamahTimeMinutes < minimumIqamahTime) ? '13:30' : currentIqamahTime;
+    const minimumIqamahTime = timeToMinutes('13:10');
+    return (iqamahTimeMinutes < minimumIqamahTime) ? '13:10' : currentIqamahTime;
 }
 
 // Global Iqamah Selector

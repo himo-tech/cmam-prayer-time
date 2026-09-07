@@ -109,11 +109,12 @@ function ishaIqamahTime(currentPrayerTime, currentIqamahTime) {
 }
 
 // Iqamah logic for Zuhr
-//function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
+function zuhrIqamahTime(currentPrayerTime, currentIqamahTime) {
 //    const iqamahTimeMinutes = timeToMinutes(currentIqamahTime);
 //    const minimumIqamahTime = timeToMinutes('13:20');
 //    return (iqamahTimeMinutes < minimumIqamahTime) ? '13:20' : currentIqamahTime;
-//}
+    return currentIqamahTime;
+}
 
 // Global Iqamah Selector
 function getIqamahTime (salatName, time, iqamahTimeValue) {
